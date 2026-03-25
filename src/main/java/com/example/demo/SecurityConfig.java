@@ -7,20 +7,21 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
-@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    	 System.out.println("✅ Custom SecurityConfig Loaded");
+
+        System.out.println("✅ Security FULLY DISABLED");
+
         http
-            .cors().and()
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()   // 🔥 allow everything for now
+                .anyRequest().permitAll()
             )
             .httpBasic(httpBasic -> httpBasic.disable())
-            .formLogin(form -> form.disable());
+            .formLogin(form -> form.disable())
+            .securityMatcher("/**"); // 🔥 force match all
 
         return http.build();
     }

@@ -25,7 +25,7 @@ public class EmployeeController {
     private EmployeeService service;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
+	/* @PreAuthorize("hasAnyRole('USER','ADMIN')") */
     public List<Employee> getEmployees() {
     	System.out.println("getEmployess called");
         return service.getAllEmployees();
@@ -42,7 +42,7 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
+	/* @PreAuthorize("hasAnyRole('ADMIN')") */
     public void deleteEmployee(@PathVariable int id) {
         service.deleteEmployee(id);
         System.out.println("deleted");
