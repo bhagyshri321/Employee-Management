@@ -7,6 +7,7 @@ import org.springframework.web.cors.*;
 import com.example.demo.jwt.JwtFilter;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -39,14 +40,16 @@ public class SecurityConfig {
                 return config;
             }))
             .csrf(csrf -> csrf.disable())
-
+            .sessionManagement(session -> session
+            	    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            	)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/register").permitAll()
-
+                
                 // 🔐 ROLE-BASED SECURITY
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-
+                .requestMatchers("/employees/**").authenticated()
                 .anyRequest().authenticated()
             )
 
