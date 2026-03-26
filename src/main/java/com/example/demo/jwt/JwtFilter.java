@@ -17,13 +17,13 @@ public class JwtFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
 
-        String path = request.getServletPath();
-
-        // 🔹 Skip public endpoints
-        if (path.startsWith("/user/login") || path.startsWith("/user/register")) {
-            chain.doFilter(request, response);
-            return;
-        }
+    	String path = request.getRequestURI(); // use getRequestURI instead of getServletPath
+    	System.out.println("JwtFilter sees request path: " + request.getRequestURI());
+    	if (path.equals("/user/register") || path.equals("/user/login") ||
+    	    path.startsWith("/user/register/") || path.startsWith("/user/login/")) {
+    	    chain.doFilter(request, response);
+    	    return;
+    	}
 
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
