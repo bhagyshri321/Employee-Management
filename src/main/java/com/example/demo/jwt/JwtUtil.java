@@ -1,12 +1,18 @@
 package com.example.demo.jwt;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
+import java.security.Key;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
-import java.util.Date;
-import java.nio.charset.StandardCharsets;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+
+import org.springframework.stereotype.Component;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
@@ -19,10 +25,10 @@ public class JwtUtil {
     public String generateToken(String username, String role) {
         return Jwts.builder()
                 .setSubject(username)
-                .claim("role", role)
+                .claim("role", role) // store as ADMIN / USER
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-                .signWith(SECRET_KEY) // ✅ FIXED
+                .signWith(SECRET_KEY)
                 .compact();
     }
 
@@ -35,9 +41,17 @@ public class JwtUtil {
                 .getSubject();
     }
 
+    public String extractRole(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(SECRET_KEY)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
+    }
+
     public boolean validateToken(String token, String username) {
-        String tokenUsername = extractUsername(token);
-        return (tokenUsername.equals(username) && !isTokenExpired(token));
+        return extractUsername(token).equals(username) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {
@@ -47,17 +61,7 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody()
                 .getExpiration();
+
         return expiration.before(new Date());
     }
-    
-    public String extractRole(String token) {
-        return Jwts.parser()
-            .setSigningKey(SECRET_KEY)
-            .parseClaimsJws(token)
-            .getBody()
-            .get("role", String.class);
-    }
 }
-
-
-
