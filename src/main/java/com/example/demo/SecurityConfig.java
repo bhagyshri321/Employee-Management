@@ -3,9 +3,7 @@ package com.example.demo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.*;
-
 import com.example.demo.jwt.JwtFilter;
-
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,37 +23,28 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        System.out.println("🔐 Security ENABLED with JWT");
-
         http
+            // 🔹 CORS config
             .cors(cors -> cors.configurationSource(request -> {
                 CorsConfiguration config = new CorsConfiguration();
                 config.setAllowCredentials(true);
-                config.setAllowedOrigins(List.of(
-                    "https://69c3c62b0c7bd80df9316141--frontend-emp-management.netlify.app"
-                ));
+                config.setAllowedOrigins(List.of("*")); // For testing, allow all origins
                 config.setAllowedHeaders(List.of("*"));
                 config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                 return config;
             }))
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf.disable()) // JWT + REST API, so CSRF disabled
             .sessionManagement(session -> session
-            	    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            	)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/register").permitAll()
-                
-                // 🔐 ROLE-BASED SECURITY
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("/login", "/register").permitAll() // PUBLIC
+                .requestMatchers("/admin/**").hasRole("ADMIN")       // ROLE-BASED
+                .requestMatchers("/user/**").hasAnyRole("USER","ADMIN")
                 .requestMatchers("/employees/**").authenticated()
                 .anyRequest().authenticated()
             )
-
-            // 🔥 ADD JWT FILTER HERE
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-
             .httpBasic(httpBasic -> httpBasic.disable())
             .formLogin(form -> form.disable());
 
