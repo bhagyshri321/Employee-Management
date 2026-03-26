@@ -28,18 +28,17 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(request -> {
                 CorsConfiguration config = new CorsConfiguration();
                 config.setAllowCredentials(true);
-                config.setAllowedOrigins(List.of("*")); // For testing, allow all origins
+                // For testing you can use "*", for production use frontend URL
+                config.setAllowedOrigins(List.of("*"));
                 config.setAllowedHeaders(List.of("*"));
-                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
                 return config;
             }))
-            .csrf(csrf -> csrf.disable()) // JWT + REST API, so CSRF disabled
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/register").permitAll() // PUBLIC
-                .requestMatchers("/admin/**").hasRole("ADMIN")       // ROLE-BASED
+                .requestMatchers("/user/register", "/user/login").permitAll() // public
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/user/**").hasAnyRole("USER","ADMIN")
                 .requestMatchers("/employees/**").authenticated()
                 .anyRequest().authenticated()

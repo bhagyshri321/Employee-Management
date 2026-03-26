@@ -20,12 +20,11 @@ public class JwtFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
 
         // 🔹 Skip public endpoints
-        if (path.equals("/login") || path.equals("/register")) {
+        if (path.startsWith("/user/login") || path.startsWith("/user/register")) {
             chain.doFilter(request, response);
             return;
         }
 
-        // 🔹 Existing JWT validation logic
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
@@ -33,9 +32,14 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         String token = authHeader.substring(7);
-        // TODO: validate token
-        // If valid, set Authentication in SecurityContext
-        // else response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+
+        try {
+            // TODO: validate token
+            // e.g., jwtUtil.validateToken(token)
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
+            return;
+        }
 
         chain.doFilter(request, response);
     }
