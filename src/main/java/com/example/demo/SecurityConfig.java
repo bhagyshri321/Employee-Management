@@ -1,20 +1,22 @@
 package com.example.demo;
 
+import com.example.demo.jwt.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.cors.*;
-import com.example.demo.jwt.JwtFilter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
 @Configuration
 public class SecurityConfig {
 
+	
     private final JwtFilter jwtFilter;
 
     public SecurityConfig(JwtFilter jwtFilter) {
@@ -23,18 +25,19 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
+        // 🔹 CORS config
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of("*")); // replace "*" with frontend URL in production
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+        source.registerCorsConfiguration("/**", config);
+
         http
-            // 🔹 CORS config
-            .cors(cors -> cors.configurationSource(request -> {
-                CorsConfiguration config = new CorsConfiguration();
-                config.setAllowCredentials(true);
-                // For testing you can use "*", for production use frontend URL
-                config.setAllowedOrigins(List.of("*"));
-                config.setAllowedHeaders(List.of("*"));
-                config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
-                return config;
-            }))
-            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(source))
+            .csrf(csrf -> csrf.disable()) // REST API, disable CSRF
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/user/register", "/user/login").permitAll() // public

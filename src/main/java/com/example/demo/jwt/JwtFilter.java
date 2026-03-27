@@ -17,13 +17,12 @@ public class JwtFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
 
-        // 🔹 Use getRequestURI() to match full path, including proxies
-        String path = request.getRequestURI();
-        System.out.println("JwtFilter sees request path: " + path); // debug log
+        // 🔹 Use getServletPath() for consistent path checking
+        String path = request.getServletPath();
+        System.out.println("JwtFilter sees request path: " + path);
 
-        // 🔹 Skip public endpoints (exact + trailing slash)
-        if (path.equals("/user/register") || path.equals("/user/login") ||
-            path.startsWith("/user/register/") || path.startsWith("/user/login/")) {
+        // 🔹 Skip public endpoints
+        if (path.equals("/user/register") || path.equals("/user/login")) {
             chain.doFilter(request, response);
             return;
         }
@@ -39,7 +38,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         try {
-            // TODO: validate the token properly using JwtUtil
+            // TODO: validate token using JwtUtil
             // Example: jwtUtil.validateToken(token);
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403 if invalid
@@ -47,7 +46,6 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 🔹 Proceed with the request
         chain.doFilter(request, response);
     }
 }
