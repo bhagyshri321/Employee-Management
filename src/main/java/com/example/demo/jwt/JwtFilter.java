@@ -17,30 +17,37 @@ public class JwtFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
 
-    	String path = request.getRequestURI(); // use getRequestURI instead of getServletPath
-    	System.out.println("JwtFilter sees request path: " + request.getRequestURI());
-    	if (path.equals("/user/register") || path.equals("/user/login") ||
-    	    path.startsWith("/user/register/") || path.startsWith("/user/login/")) {
-    	    chain.doFilter(request, response);
-    	    return;
-    	}
+        // 🔹 Use getRequestURI() to match full path, including proxies
+        String path = request.getRequestURI();
+        System.out.println("JwtFilter sees request path: " + path); // debug log
 
+        // 🔹 Skip public endpoints (exact + trailing slash)
+        if (path.equals("/user/register") || path.equals("/user/login") ||
+            path.startsWith("/user/register/") || path.startsWith("/user/login/")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        // 🔹 JWT validation
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
+            response.getWriter().write("Missing or invalid Authorization header");
             return;
         }
 
         String token = authHeader.substring(7);
 
         try {
-            // TODO: validate token
-            // e.g., jwtUtil.validateToken(token)
+            // TODO: validate the token properly using JwtUtil
+            // Example: jwtUtil.validateToken(token);
         } catch (Exception e) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403 if invalid
+            response.getWriter().write("Invalid token");
             return;
         }
 
+        // 🔹 Proceed with the request
         chain.doFilter(request, response);
     }
 }

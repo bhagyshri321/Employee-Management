@@ -8,7 +8,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 @EnableMethodSecurity
-@Configuration
+
 @SpringBootApplication
 public class EmployeeManagementApplication {
 
